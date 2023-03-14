@@ -1,6 +1,6 @@
 ![image](images/microchip.jpg) 
 
-## %repoDescritpion%
+## hall sensor based foc dspic33ck256mp508 lvmc
 
 Board Image if any.
 
