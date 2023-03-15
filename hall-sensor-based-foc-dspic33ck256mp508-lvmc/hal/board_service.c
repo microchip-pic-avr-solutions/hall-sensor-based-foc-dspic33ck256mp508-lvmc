@@ -40,6 +40,7 @@
 #include "adc.h"
 #include "pwm.h"
 #include "cmp.h"
+#include "sccp.h"
 
 BUTTON_T buttonStartStop;
 BUTTON_T buttonSpeedHalfDouble;
@@ -149,6 +150,18 @@ void ButtonGroupInitialize(void)
     buttonSpeedHalfDouble.state = false;
 
 }
+
+uint16_t HAL_HallValueRead(void) 
+{
+    uint16_t buffer;
+    uint16_t hallValue;
+
+    buffer = PORTE;
+    buffer = buffer >> 8;
+    hallValue = buffer & 0x0007;
+    
+    return hallValue;
+}
 // *****************************************************************************
 /* Function:
     Init_Peripherals()
@@ -172,7 +185,8 @@ void ButtonGroupInitialize(void)
     None.
  */
 void InitPeripherals(void)
-{        
+{          
+    Init_SCCP4 ();     
     uint16_t cmpReference = 0;
     CMP_Initialize();
     CMP1_ModuleEnable(true);

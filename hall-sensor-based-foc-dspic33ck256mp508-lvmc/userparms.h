@@ -45,6 +45,7 @@ extern "C" {
 // *****************************************************************************
 #include <stdint.h>
 #include "general.h"
+#include "hal/sccp.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -99,11 +100,11 @@ controllers, tuning mode will disable the speed PI controller */
 #define MAXIMUM_SPEED_RPM    3500 
 
 /* The following values are given in the xls attached file */
-#define NORM_CURRENT_CONST     0.000671
+#define NORM_CURRENT_CONST     0.000179
 /* normalized ls/dt value */
-#define NORM_LSDTBASE 8129
+#define NORM_LSDTBASE 2162
 /* normalized rs value */
-#define NORM_RS  9044
+#define NORM_RS  2406
 /* the calculation of Rs gives a value exceeding the Q15 range so,
  the normalized value is further divided by 2 to fit the 32768 limit
  this is taken care in the estim.c where the value is implied
@@ -182,6 +183,16 @@ minimum value accepted */
 /* The Speed Control Loop Executes every  SPEEDREFRAMP_COUNT */
 #define SPEEDREFRAMP_COUNT   3  
     
+/**  SPEED MULTIPLIER CALCULATION = ((FCY*60)/(TIMER_PRESCALER*POLEPAIRS))  */
+#define SPEED_MULTI     (unsigned long)((((float)FCY/(float)(SPEED_MEASURE_TIMER_PRESCALER*NOPOLESPAIRS))*(float)60)*(float)(10/12))
+    
+// *****************************************************************************
+/** Moving Average - No of Samples*/
+#define PERIOD_MOVING_AVG_FILTER_SCALE     4
+#define PERIOD_MOVING_AVG_FILTER_SIZE       (uint16_t)(1 << PERIOD_MOVING_AVG_FILTER_SCALE) 
+#define SPEED_MOVING_AVG_FILTER_SCALE      4
+#define SPEED_MOVING_AVG_FILTER_SIZE       (uint16_t)(1 << SPEED_MOVING_AVG_FILTER_SCALE)
+    
 /* PI controllers tuning values - */     
 /* D Control Loop Coefficients */
 #define D_CURRCNTR_PTERM       Q15(0.05)
@@ -196,8 +207,8 @@ minimum value accepted */
 #define Q_CURRCNTR_OUTMAX      0x7FFF
 
 /* Velocity Control Loop Coefficients */
-#define SPEEDCNTR_PTERM        Q15(0.05)
-#define SPEEDCNTR_ITERM        Q15(0.001)
+#define SPEEDCNTR_PTERM        Q15(0.0286)
+#define SPEEDCNTR_ITERM        Q15(0.000126)
 #define SPEEDCNTR_CTERM        Q15(0.999)
 #define SPEEDCNTR_OUTMAX       0x5000
 /******************************** Field Weakening *****************************/

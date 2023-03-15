@@ -76,6 +76,12 @@ typedef struct
     PWM ISR cycles (i.e. BOARD_SERVICE_TICK_COUNT = 1 milli Second / PWM period)*/
 #define BOARD_SERVICE_TICK_COUNT   20
 
+#define HAL_MC1HallStateChangeInterrupt              _CNEInterrupt    
+#define HAL_MC1HallStateChangeDetectionEnable        CN_PortEEnable        
+#define HAL_MC1HallStateChangeInterruptFlagClear    CN_InterruptPortEFlagClear
+#define HAL_MC1HallStateChangeMaxPeriodSet           SCCP4_SetTimerPeriod
+#define HAL_MC1HallStateChangeTimerPrescalerSet      SCCP4_SetTimerPrescaler    
+#define HAL_MC1HallStateChangeTimerStart             SCCP4_Timer_Start    
 
 extern void DisablePWMOutputsInverterA(void);
 extern void EnablePWMOutputsInverterA(void);
@@ -89,6 +95,7 @@ extern void InitPeripherals(void);
 extern void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *,MC_DUTYCYCLEOUT_T *);
 extern void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *);
 extern void pwmDutyCycleLimitCheck(MC_DUTYCYCLEOUT_T *,uint16_t,uint16_t);
+uint16_t HAL_HallValueRead(void);
 
 #ifdef __cplusplus
 }

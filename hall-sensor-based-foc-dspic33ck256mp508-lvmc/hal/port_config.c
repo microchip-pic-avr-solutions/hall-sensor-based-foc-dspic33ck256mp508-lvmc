@@ -239,7 +239,12 @@ void MapGPIOHWFunction(void)
     TRISBbits.TRISB12 = 0 ;          
     TRISBbits.TRISB13 = 0 ;           
     TRISDbits.TRISD1 = 0 ;          
-    TRISDbits.TRISD0 = 0 ;         
+    TRISDbits.TRISD0 = 0 ;      
+    
+    //Hall Sensors
+    TRISEbits.TRISE8 = 1;
+    TRISEbits.TRISE9 = 1;
+    TRISEbits.TRISE10 = 1;
     
     // Debug LEDs
     // LED2 : 
@@ -261,6 +266,51 @@ void MapGPIOHWFunction(void)
         UART_TX : PIN #14 - ANN2/RP77/RD13(Output)   */
     _U1RXR = 78;
     _RP77R = 0b000001;
-    
-    
+
+    CN_Configure();
+}
+
+/* Function:
+    CN_Configure()
+
+  Summary:
+    Routine to setup change notifications
+
+  Description:
+    Function initializes mismatch/edge change detection and enabling
+	corresponding pins to obtain change notification status
+
+  Precondition:
+    None.
+
+  Parameters:
+    None
+
+  Returns:
+    None.
+
+  Remarks:
+    None.
+ */
+
+void CN_Configure(void)
+{
+    CNCONE = 0;
+/*  ON: Change Notification (CN) Control for PORTx On bit
+    1 = CN is enabled
+    0 = CN is disabled   */
+    CNCONEbits.ON = 0;
+/*    CNSTYLE: Change Notification Style Selection bit
+    1 = Edge style (detects edge transitions, bits are used for a CNE)
+    0 = Mismatch style (detects change from last port read event)       */    
+    CNCONEbits.CNSTYLE = 0;
+     
+    CNEN0E = 0;
+    CNEN0Ebits.CNEN0E8 = 1;
+    CNEN0Ebits.CNEN0E9 = 1;
+    CNEN0Ebits.CNEN0E10 = 1;
+
+    _CNEIF = 0;
+    _CNEIE = 1;
+    _CNEIP = 7;
 }

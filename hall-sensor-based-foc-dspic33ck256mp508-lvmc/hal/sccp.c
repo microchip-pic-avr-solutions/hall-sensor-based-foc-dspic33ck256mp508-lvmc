@@ -1,21 +1,19 @@
 /*******************************************************************************
-  Hardware specific routine definition and interfaces Header File
+  Timer Configuration Routine source File.
 
   File Name:
-    port_config.h
+    sccp.c
 
   Summary:
-    This file includes subroutine for initializing GPIO pins as analog/digital,
-    input or output etc. Also to PPS functionality to Remap-able input or output 
-    pins
+    This file includes subroutine for initializing Timer Reference for Speed Calculation.
 
   Description:
-    Definitions in the file are for dsPIC33CK256MP508 on Motor Control 
-    Development board from Microchip
+    Definitions in the file are for dsPIC33CK256MP508 External OP-AMP PIM
+    plugged onto Motor Control Development board from Microchip.
 
 *******************************************************************************/
 /*******************************************************************************
-* Copyright (c) 2017 released Microchip Technology Inc.  All rights reserved.
+* Copyright (c) 2019 released Microchip Technology Inc.  All rights reserved.
 *
 * SOFTWARE LICENSE AGREEMENT:
 * 
@@ -48,72 +46,58 @@
 * certify, or support the code.
 *
 *******************************************************************************/
-#ifndef _PORTCONFIG_H
-#define _PORTCONFIG_H
-
+// *****************************************************************************
+// *****************************************************************************
+// Section: Included Files
+// *****************************************************************************
+// *****************************************************************************
 #include <xc.h>
+#include <stdint.h>
+#include "clock.h"
+// *****************************************************************************
+// *****************************************************************************
+// Section: Functions
+// *****************************************************************************
+// *****************************************************************************
+void Init_SCCP4(void);
+// *****************************************************************************
+/* Function:
+    void Init_SCCP4(void)
 
-#ifdef __cplusplus  // Provide C++ Compatibility
-    extern "C" {
-#endif
+  Summary:
+    Routine to initialize SCCP4 in timer mode
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Constants
-// *****************************************************************************
-// *****************************************************************************
-// Digital I/O definitions
-// Push button Switches
+  Description:
+    Function to find the time difference for speed calculation
+
+  Precondition:
+    None.
+
+  Parameters:
+    None
+
+  Returns:
+    None.
+
+  Remarks:
+    None.
+ */
+void Init_SCCP4(void)
+{          
+    CCP4CON1Lbits.CCSEL = 0;     // Set SCCP4 operating OFF
+    CCP4CON1Lbits.T32 = 0;       // Set timebase width (16-bit = 0)
+    CCP4CON1Lbits.MOD = 0b0000;  // Set mode to 16/32 bit timer mode features to Output Timer Mode
+    CCP4CON1Hbits.SYNC = 0b00000;// No external synchronization; timer rolls over at FFFFh or matches with the Timer Period register
+    CCP4CON1Lbits.TMRSYNC = 0;   // Set timebase synchronization (Synchronized)
+    CCP4CON1Lbits.CLKSEL = 0b000;// Set the clock source (Tcy)
+    CCP4CON1Lbits.TMRPS = 0b00;  // Set the clock pre-scaler (1:64)
+    CCP4CON1Hbits.TRIGEN = 0;    // Set Sync/Triggered mode (Synchronous)
     
-//Hall A
-#define HALL_A                PORTEbits.RE8   
-//Hall B
-#define HALL_B                PORTEbits.RE9   
-//Hall C
-#define HALL_C                PORTEbits.RE10
-        
-// SW1 :  (RE11)
-#define SW1                   PORTEbits.RE11
-// SW2 :  (RE12)
-#define SW2                   PORTEbits.RE12
-        
-// S2 : PIM #83 - Used as START/STOP button of Motor
-#define BUTTON_START_STOP        SW1
-// S3 : PIM #84 - Used as Speed HALF/DOUBLE button of Motor
-#define BUTTON_SPEED_HALF_DOUBLE      SW2
-
-
-// Debug LEDs
-// LED2(LD11) : (RE7)
-#define LED2                    LATEbits.LATE7
-// LED1(LD10) : (RE6)
-#define LED1                    LATEbits.LATE6
-
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Interface Routines
-// *****************************************************************************
-// *****************************************************************************
-void CN_Configure (void);
-void MapGPIOHWFunction(void);
-void SetupGPIOPorts(void);
-
-inline static void CN_InterruptPortEFlagClear(void) 
-{ 
-    uint16_t buffer;
-    
-    buffer = CNSTATE;  
-    _CNEIF = 0;
+    CCP4TMRL = 0x0000;           // Initialize timer prior to enable module.
+    CCP4TMRH = 0x0000;           // Initialize timer prior to enable module.
+   
+    IPC10bits.CCT4IP = 6;        // Interrupt Priority set
+    IFS2bits.CCT4IF = 0;         // Clear Interrupt flag
+    IEC2bits.CCT4IE = 0;         // Disable Interrupt
+    CCP4CON1Lbits.CCPON = 0;     // Disable CCP/input capture
 }
-
-inline static void CN_PortEEnable(void){CNCONEbits.ON = 1;}
-
-inline static void CN_PortEDisable(void){CNCONEbits.ON = 0;}
-
-#ifdef __cplusplus  // Provide C++ Compatibility
-    }
-#endif
-#endif      // end of PORTCONFIG_H
-
-

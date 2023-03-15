@@ -1,21 +1,19 @@
 /*******************************************************************************
-  Hardware specific routine definition and interfaces Header File
+  Timer Configuration Routine Header File
 
   File Name:
-    port_config.h
+    sccp.h
 
   Summary:
-    This file includes subroutine for initializing GPIO pins as analog/digital,
-    input or output etc. Also to PPS functionality to Remap-able input or output 
-    pins
+    This header file lists SCCP Configuration related functions and definitions.
 
   Description:
-    Definitions in the file are for dsPIC33CK256MP508 on Motor Control 
-    Development board from Microchip
+    Definitions in the file are for dsPIC33CK256MP508 MC PIM plugged onto
+    Motor Control Development board from Microchip
 
 *******************************************************************************/
 /*******************************************************************************
-* Copyright (c) 2017 released Microchip Technology Inc.  All rights reserved.
+* Copyright (c) 2019 released Microchip Technology Inc.  All rights reserved.
 *
 * SOFTWARE LICENSE AGREEMENT:
 * 
@@ -48,72 +46,100 @@
 * certify, or support the code.
 *
 *******************************************************************************/
-#ifndef _PORTCONFIG_H
-#define _PORTCONFIG_H
 
-#include <xc.h>
+#ifndef _SCCP_H
+#define _SCCP_H
 
-#ifdef __cplusplus  // Provide C++ Compatibility
+#ifdef __cplusplus  // Provide C++ Compatability
     extern "C" {
 #endif
-
+     
+ // *****************************************************************************
+// *****************************************************************************
+// Section: Included Files
+// *****************************************************************************
+// *****************************************************************************
+#include <xc.h>
+#include <stdint.h>
 // *****************************************************************************
 // *****************************************************************************
 // Section: Constants
+   /** The SCCP3 Timer Prescaler Value set to 1:64 */
+#define	SPEED_MEASURE_TIMER_PRESCALER     64     
+// *****************************************************************************
+// Section: Functions
 // *****************************************************************************
 // *****************************************************************************
-// Digital I/O definitions
-// Push button Switches
-    
-//Hall A
-#define HALL_A                PORTEbits.RE8   
-//Hall B
-#define HALL_B                PORTEbits.RE9   
-//Hall C
-#define HALL_C                PORTEbits.RE10
-        
-// SW1 :  (RE11)
-#define SW1                   PORTEbits.RE11
-// SW2 :  (RE12)
-#define SW2                   PORTEbits.RE12
-        
-// S2 : PIM #83 - Used as START/STOP button of Motor
-#define BUTTON_START_STOP        SW1
-// S3 : PIM #84 - Used as Speed HALF/DOUBLE button of Motor
-#define BUTTON_SPEED_HALF_DOUBLE      SW2
-
-
-// Debug LEDs
-// LED2(LD11) : (RE7)
-#define LED2                    LATEbits.LATE7
-// LED1(LD10) : (RE6)
-#define LED1                    LATEbits.LATE6
-
-
+void Init_SCCP4(void);
 // *****************************************************************************
 // *****************************************************************************
 // Section: Interface Routines
 // *****************************************************************************
 // *****************************************************************************
-void CN_Configure (void);
-void MapGPIOHWFunction(void);
-void SetupGPIOPorts(void);
-
-inline static void CN_InterruptPortEFlagClear(void) 
-{ 
-    uint16_t buffer;
     
-    buffer = CNSTATE;  
-    _CNEIF = 0;
+// <editor-fold defaultstate="expanded" desc="TYPE DEFINITIONS ">  
+        
+/** SCCP4 Clock Pre-scalers */
+typedef enum tagSCCP4_CLOCK_PRESCALER
+{ 
+    /** TMRPS<1:0>: CCPx Time Base Prescale Select bits
+        0b11 = 1:64 , 0b10 = 1:16 ,0b01 = 1:4 0b00 = 1:1                     */
+    SCCP4_CLOCK_PRESCALER_64    = 3,
+    SCCP4_CLOCK_PRESCALER_16    = 2,
+    SCCP4_CLOCK_PRESCALER_4     = 1,
+    SCCP4_CLOCK_PRESCALER_1     = 0,
+            
+}SCCP4_CLOCK_PRESCALER_TYPE;
+
+// </editor-fold> 
+
+inline static int32_t SCCP4_TimerDataRead(void) 
+{ 
+    uint32_t timervalue;
+    uint32_t timerLvalue;
+    uint32_t timerHvalue;
+    timerLvalue = CCP4TMRL;
+    timerHvalue = CCP4TMRH;
+    timervalue =  (timerHvalue << 16) + timerLvalue;
+    return timervalue;
 }
 
-inline static void CN_PortEEnable(void){CNCONEbits.ON = 1;}
-
-inline static void CN_PortEDisable(void){CNCONEbits.ON = 0;}
-
-#ifdef __cplusplus  // Provide C++ Compatibility
+inline static void SCCP4_SetTimerPeriod(uint32_t timerPeriod) 
+{ 
+    CCP4PRL = (uint16_t)(timerPeriod & 0x0000FFFF);           
+    CCP4PRH = (uint16_t)(timerPeriod >> 16);    
+}
+/**
+ * Sets the TImer1 Input Clock Select bits.
+ * @example
+ * <code>
+ * TIMER1_InputClockSet();
+ * </code>
+ */
+inline static void SCCP4_SetTimerPrescaler(uint16_t timerPrescaler)
+{
+    if(timerPrescaler == 64)
+    {
+        CCP4CON1Lbits.TMRPS = SCCP4_CLOCK_PRESCALER_64;
     }
-#endif
-#endif      // end of PORTCONFIG_H
+    else if(timerPrescaler == 16)
+    {
+        CCP4CON1Lbits.TMRPS = SCCP4_CLOCK_PRESCALER_16;
+    }
+    else if(timerPrescaler == 4)
+    {
+        CCP4CON1Lbits.TMRPS = SCCP4_CLOCK_PRESCALER_4;
+    }
+    else if(timerPrescaler == 1)
+    {
+        CCP4CON1Lbits.TMRPS = SCCP4_CLOCK_PRESCALER_1;
+    }
+    
+}
 
+inline static void SCCP4_Timer_Start()
+{
+     CCP4CON1Lbits.CCPON = 1;
+}       
 
+#endif        

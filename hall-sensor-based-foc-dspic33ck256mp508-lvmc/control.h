@@ -104,6 +104,42 @@ typedef union
     uint16_t Word;
 } UGF_T;
 
+typedef struct
+{
+   uint16_t index;
+   int16_t buffer[SPEED_MOVING_AVG_FILTER_SIZE];
+   int32_t sum;
+   int16_t avg;
+}MCAPP_SPEED_MOVING_AVG_T;
+
+typedef struct
+{    
+    int32_t  timerDelta;
+    uint32_t  timerPrev;
+    uint32_t  timeIntervalMax;
+    uint16_t  speedValue;
+    uint16_t timerDeltaPreScaler;
+} MCAPP_SPEED_CALC_T;
+
+typedef struct 
+{
+    uint16_t timerValue;
+    
+    /* internal variable for angle */
+    int32_t ThetaStateVar;
+    
+    uint16_t sector;
+    
+    uint16_t SpeedHall;
+    
+    /* angle of estimation */
+    int16_t HallTheta;
+    
+    MCAPP_SPEED_MOVING_AVG_T movingAvgFilterSpeed;
+    MCAPP_SPEED_CALC_T    calculateSpeed;
+} MCAPP_DATA_T;
+
+extern MCAPP_DATA_T mcappData;
 extern CTRL_PARM_T ctrlParm;
 extern MOTOR_STARTUP_DATA_T motorStartUpData;
 extern MC_ALPHABETA_T valphabeta,ialphabeta;
