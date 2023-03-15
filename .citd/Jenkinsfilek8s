@@ -21,7 +21,7 @@ pipeline {
         */
         NOTIFICATION_EMAIL = '1f1319de.microchip.com@amer.teams.ms'  
         // GitHub production organization name
-        GITHUB_PRODUCTION_ORGANIZATION = "microchip-pic-avr-examples"
+        GITHUB_PRODUCTION_ORGANIZATION = "microchip-pic-avr-solutions"
         
         /*
             GitHub Deploy Stage Information
@@ -35,6 +35,8 @@ pipeline {
 		/*When using the main.json schema version 1.3.0 or higher, the PORTAL will first reject registration attempt when an unapproved keyword is found, but can be forced to accept. 
 		  This argument is used to provide the list of unapproved keywords (also listed in main.json) which the deployment script will force the PORTAL to accept.*/
         UNAPPROVED_KEYWORDS_OVERRIDE_LIST="NONE"
+        
+        /*
         
         /*
             GitHub Page Stage Information
@@ -67,6 +69,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+				sh "git submodule update --init"
             }
         }
         
@@ -82,7 +85,9 @@ pipeline {
         
         stage('Build') {
             steps {
-                script {      
+                script {  
+                    sh("npm install -g xml2js")
+		    sh("npm link xml2js")				
                     mplabxProjectBuild(
                         sourceFilePath: "${env.MPLABX_PROJECT_SOURCE}"
                     )
@@ -168,7 +173,8 @@ pipeline {
                         bitbucketUrl: "${env.BITBUCKET_SOURCE_URL}",
                         deployBranchList: "${env.DEPLOY_BRANCH_LIST}",
                         deployExcludeFileList: "${env.DEPLOY_EXCLUDE_FOLDER_FILE_LIST}",
-                        githubOrgName: "${env.GITHUB_PRODUCTION_ORGANIZATION}"
+                        githubOrgName: "${env.GITHUB_PRODUCTION_ORGANIZATION}",
+						includeSubmoduleCode: "true"
                     )
                 }
             }
