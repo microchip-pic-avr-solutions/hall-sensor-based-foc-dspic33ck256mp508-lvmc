@@ -56,9 +56,13 @@ pipeline {
         MPLABX_PROJECT_SOURCE = "../"
     }
 
+    triggers { 
+        cron(env.BRANCH_NAME == 'develop' ? 'H H 1 * *': '') 
+    }
+	
     options {
         timestamps()
-        timeout(time: 20, unit: 'MINUTES')
+        timeout(time: 30, unit: 'MINUTES')
     }
 
     stages {
@@ -112,7 +116,7 @@ pipeline {
                     )
                 }
             }
-        }
+        } 
         
         stage('Doxygen files generation') {
             when {
