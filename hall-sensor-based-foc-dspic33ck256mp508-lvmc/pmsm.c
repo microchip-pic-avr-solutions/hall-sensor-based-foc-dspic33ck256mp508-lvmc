@@ -42,8 +42,7 @@
 #include "general.h"   
 #include "userparms.h"
 
-#include "control.h"   
-#include "estim.h"
+#include "control.h" 
 #include "fdweak.h"
 
 #include "clock.h"
@@ -84,12 +83,20 @@ volatile uint16_t adcDataBuffer;
 MCAPP_MEASURE_T measureInputs;
 
 /** Definitions */
-/* Open loop angle scaling Constant - This corresponds to 1024(2^10)
-   Scaling down motorStartUpData.startupRamp to thetaElectricalOpenLoop   */
-#define STARTUPRAMP_THETA_OPENLOOP_SCALER       10 
-/* Fraction of dc link voltage(expressed as a squared amplitude) to set 
+/* Fraction of DC link voltage(expressed as a squared amplitude) to set 
  * the limit for current controllers PI Output */
 #define MAX_VOLTAGE_VECTOR                      0.98
+/* The count corresponding to 60degree angle i.e, 32768/3  */
+#define SECTOR_ANGLE    10922    
+/*Offset between the zero crossing sector and the Phase A 
+ * current zero crossing    */
+#define OFFSET_CORRECTION   (-4000)
+/*Hall angle correction divisor for correcting angle difference 
+ *  between the sectors     */
+#define HALL_CORRECTION_DIVISOR 3
+/*Number of steps in which the Hall sensor angle correction is done
+ i.e,2^HALL_CORRECTION_DIVISOR  */
+#define HALL_CORRECTION_STEPS   8 
 
 void InitControlParameters(void);
 void DoControl( void );
@@ -135,6 +142,8 @@ int main ( void )
     HAL_MC1HallStateChangeMaxPeriodSet(0xFFFFFFFF);
     HAL_MC1HallStateChangeTimerStart();
     CORCONbits.SATA = 0;
+    mcappData.PeriodKFilter = Q15(0.001);
+    mcappData.period = 0xFFF0;
     while(1)
     {        
         /* Reset parameters used for running motor through Inverter A*/
@@ -162,10 +171,10 @@ int main ( void )
             // Monitoring for Button 2 press in LVMC
             if (IsPressed_Button2())
             {                
-//                if ((uGF.bits.RunMotor == 1) && (uGF.bits.OpenLoop == 0))
-//                {
-//                    uGF.bits.ChangeSpeed = !uGF.bits.ChangeSpeed;
-//                }
+                if ((uGF.bits.RunMotor == 1) && (uGF.bits.OpenLoop == 0))
+                {
+                    uGF.bits.ChangeSpeed = !uGF.bits.ChangeSpeed;
+                }
             }
 
         }
@@ -174,74 +183,7 @@ int main ( void )
     // should never get here
     while(1){}
 }
-/******************************************************************************
- * Description: The MCAPP_SpeedCalculate calculates the difference in the time
- *              between two sector changes and determines the instantaneous
- *              speed of the motor.
- *****************************************************************************/
-void MCAPP_SpeedCalculate(uint32_t speedValue)
-{
-    mcappData.calculateSpeed.timerDelta = speedValue - mcappData.calculateSpeed.timerPrev; 
-    mcappData.calculateSpeed.timerPrev = speedValue;
-    
-    if(mcappData.calculateSpeed.timerDelta < 0)
-    {
-        mcappData.calculateSpeed.timerDelta = mcappData.calculateSpeed.timeIntervalMax + mcappData.calculateSpeed.timerDelta;
-    }
-    
-    if(mcappData.calculateSpeed.timerDelta != 0)
-    {
-        if(mcappData.calculateSpeed.timerDelta >= 30000)
-        {
-            mcappData.calculateSpeed.timerDelta  = mcappData.calculateSpeed.timerDelta>>mcappData.calculateSpeed.timerDeltaPreScaler;   
-            mcappData.calculateSpeed.speedValue = (int16_t)(__builtin_divud(SPEED_MULTI, mcappData.calculateSpeed.timerDelta));
-            mcappData.calculateSpeed.speedValue = mcappData.calculateSpeed.speedValue>>mcappData.calculateSpeed.timerDeltaPreScaler;   
-        }
-        else
-        {    
-            mcappData.calculateSpeed.speedValue = (int16_t)(__builtin_divud(SPEED_MULTI, mcappData.calculateSpeed.timerDelta));
-        }
-    }
-}
-/******************************************************************************
- * Description: The MCAPP_InitMovingAvgSpeed function initializes the speed 
- *              array table that is being used to calculate the moving average,
- *              thereby eliminate the undesired response and variations during
- *              reset and restart of motor.
- *****************************************************************************/
-void MCAPP_InitMovingAvgSpeed(void)
-{
-    uint16_t i;
-    
-    for(i=0; i<SPEED_MOVING_AVG_FILTER_SIZE; i++)
-    {
-        mcappData.movingAvgFilterSpeed.buffer[i] = 0;
-    }
-    
-    mcappData.movingAvgFilterSpeed.index = 0;
-    mcappData.movingAvgFilterSpeed.sum = 0;
-    mcappData.movingAvgFilterSpeed.avg = 0;
-}
-/******************************************************************************
- * Description: The MCAPP_CalcMovingAvgSpeed function calculates the moving
- *              average of speed.
- *****************************************************************************/
-void MCAPP_CalcMovingAvgSpeed(int16_t instSpeed)
-{    
-    uint16_t i;
-    
-    mcappData.movingAvgFilterSpeed.buffer[mcappData.movingAvgFilterSpeed.index] = instSpeed;
-    mcappData.movingAvgFilterSpeed.index++;
-    if(mcappData.movingAvgFilterSpeed.index >= SPEED_MOVING_AVG_FILTER_SIZE)
-       mcappData.movingAvgFilterSpeed.index = 0;
-    
-    mcappData.movingAvgFilterSpeed.sum = 0;
-    for(i=0; i<SPEED_MOVING_AVG_FILTER_SIZE; i++)
-    {
-        mcappData.movingAvgFilterSpeed.sum = mcappData.movingAvgFilterSpeed.sum + mcappData.movingAvgFilterSpeed.buffer[i];
-        mcappData.movingAvgFilterSpeed.avg = mcappData.movingAvgFilterSpeed.sum >> SPEED_MOVING_AVG_FILTER_SCALE;
-    }
-}
+
 // *****************************************************************************
 /* Function:
     ResetParmsA()
@@ -267,9 +209,7 @@ void MCAPP_CalcMovingAvgSpeed(int16_t instSpeed)
 void ResetParmeters(void)
 {
     /* Make sure ADC does not generate interrupt while initializing parameters*/
-	DisableADCInterrupt();
-    
-    MCAPP_InitMovingAvgSpeed();  
+	DisableADCInterrupt(); 
     HAL_MC1HallStateChangeDetectionEnable();
 #ifdef SINGLE_SHUNT
     /* Initialize Single Shunt Related parameters */
@@ -302,9 +242,7 @@ void ResetParmeters(void)
     uGF.bits.ChangeMode = 1;
     
     /* Initialize PI control parameters */
-    InitControlParameters();        
-    /* Initialize estimator parameters */
-    InitEstimParm();
+    InitControlParameters();
     /* Initialize flux weakening parameters */
     InitFWParams();
     /* Initialize measurement parameters */
@@ -488,7 +426,6 @@ void DoControl( void )
         #ifndef	TORQUE_MODE
             /* Execute the velocity control loop */
             piInputOmega.inMeasure =  mcappData.SpeedHall;
-//            piInputOmega.inMeasure = estimator.qVelEstim;
             piInputOmega.inReference = ctrlParm.qVelRef;
             MC_ControllerPIUpdate_Assembly(piInputOmega.inReference,
                                            piInputOmega.inMeasure,
@@ -534,22 +471,10 @@ void DoControl( void )
     }
 }
 
-int16_t period = 0xFFF0;
-int32_t periodStateVar;
-int16_t periodFilter;
-int16_t PeriodKFilter = Q15(0.001);
-int16_t phaseInc;
-int16_t correctHallTheta;
-int16_t hallThetaError;
-int16_t halfHallThetaCorrection;
-int16_t hallCorrectionFactor;
-int16_t hallCorrectionCounter;
-
-#define SECTOR_ANGLE    10922   // 32768/3
-#define OFFSET_CORRECTION   (-4000)
-#define HALL_CORRECTION_DIVISOR 3
-#define HALL_CORRECTION_STEPS   8// Should be power of 2^HALL_CORRECTION_DIVISOR
-
+/******************************************************************************
+ * Description: The calculation of six sector to equivalent angle in Q15 format.
+ *              Here the angle is varying from -32768 to 32767. The 
+ *****************************************************************************/
 int16_t sectorToAngle[8] =  // 3, 2, 6, 4, 5, 1
 {
     0,
@@ -569,19 +494,17 @@ int16_t sectorToAngle[8] =  // 3, 2, 6, 4, 5, 1
  *****************************************************************************/
 void __attribute__((interrupt, no_auto_psv)) HAL_MC1HallStateChangeInterrupt ()
 {
-//    period = SCCP4_TimerDataRead();
     mcappData.timerValue = CCP4TMRL;
     CCP4TMRL = CCP4TMRH = 0;
-    MCAPP_CalcMovingAvgSpeed(mcappData.timerValue);
-    period = mcappData.timerValue;// mcappData.movingAvgFilterSpeed.avg;
+    mcappData.period = mcappData.timerValue;
     mcappData.sector = HAL_HallValueRead();
     // Instead of making abrupt correction to the angle corresponding to hall sector, find the error and make gentle correction  
-    hallThetaError = (sectorToAngle[mcappData.sector] + OFFSET_CORRECTION) - mcappData.HallTheta;
+    mcappData.hallThetaError = (sectorToAngle[mcappData.sector] + OFFSET_CORRECTION) - mcappData.HallTheta;
     // Find the correction to be done in every step
     // If "hallThetaError" is 2000, and "hallCorrectionFactor" = (2000/8) = 250
     // So the error of 2000 will be corrected in 8 steps, with each step being 250
-    hallCorrectionFactor = hallThetaError >> HALL_CORRECTION_DIVISOR;
-    hallCorrectionCounter = HALL_CORRECTION_STEPS;
+    mcappData.hallCorrectionFactor = mcappData.hallThetaError >> HALL_CORRECTION_DIVISOR;
+    mcappData.hallCorrectionCounter = HALL_CORRECTION_STEPS;
     
     HAL_MC1HallStateChangeInterruptFlagClear();
 }
@@ -672,44 +595,41 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
             /* Calculate qId,qIq from qSin,qCos,qIa,qIb */
             MC_TransformClarke_Assembly(&iabc,&ialphabeta);
             MC_TransformPark_Assembly(&ialphabeta,&sincosTheta,&idq);
-
-            /* Speed and field angle estimation */
-            Estim();
             /* Calculate control values */
             DoControl();
             /* Calculate qAngle */
             CalculateParkAngle();
+            
+            mcappData.periodStateVar+= (((long int)mcappData.period - 
+                    (long int)mcappData.periodFilter)*(int)(mcappData.PeriodKFilter));
+            mcappData.periodFilter = (int)(mcappData.periodStateVar>>15);
+
+            mcappData.phaseInc = __builtin_divud((uint32_t)853334,
+                                (unsigned int)(mcappData.periodFilter >> 1));
+            
+            mcappData.SpeedHall = __builtin_divud((uint32_t)31000000,
+                                    (unsigned int)(mcappData.periodFilter));
             /* if open loop */
             if (uGF.bits.OpenLoop == 1)
             {
-                /* the angle is given by park parameter */
+                /* the angle is given by hall sensor in six steps */
                 thetaElectrical = thetaElectricalOpenLoop;
             }
             else
             {
-                /* if closed loop, angle generated by estimator */
+                /* if closed loop, angle generated by hall sensor */
                 thetaElectrical = mcappData.HallTheta;
-//                thetaElectrical = estimator.qRho;
+
+                mcappData.HallTheta = mcappData.HallTheta + mcappData.phaseInc; 
+
+                if(mcappData.hallCorrectionCounter > 0)
+                {
+                    mcappData.HallTheta = mcappData.HallTheta + mcappData.hallCorrectionFactor;
+                    mcappData.hallCorrectionCounter--;
+                }
             }
             
-            periodStateVar+= (((long int)period - (long int)periodFilter)*(int)(PeriodKFilter));
-            periodFilter = (int)(periodStateVar>>15);
-
-            phaseInc = __builtin_divud((uint32_t)853334,(unsigned int)(periodFilter >> 1));
-
-            mcappData.HallTheta = mcappData.HallTheta + phaseInc; 
             
-            if(hallCorrectionCounter > 0)
-            {
-                mcappData.HallTheta = mcappData.HallTheta + hallCorrectionFactor;
-                hallCorrectionCounter--;
-            }
-            
-            mcappData.SpeedHall = __builtin_divud((uint32_t)31000000,(unsigned int)(periodFilter));
-            /* the integral of the angle is the estimated angle */
-//            mcappData.ThetaStateVar += __builtin_mulss(mcappData.SpeedHall,
-//                                        estimator.qDeltaT);
-//            mcappData.Theta = (int16_t) (mcappData.ThetaStateVar >> 15);
             MC_CalculateSineCosine_Assembly_Ram(thetaElectrical,&sincosTheta);
             MC_TransformParkInverse_Assembly(&vdq,&sincosTheta,&valphabeta);
 
@@ -818,24 +738,14 @@ void CalculateParkAngle(void)
         /* Switch to closed loop */
         else 
         {
-            #ifndef OPEN_LOOP_FUNCTIONING
-                uGF.bits.ChangeMode = 1;
-                uGF.bits.OpenLoop = 0;
-            #endif
-        }
+                #ifndef OPEN_LOOP_FUNCTIONING
+                    uGF.bits.ChangeMode = 1;
+                    uGF.bits.OpenLoop = 0;
+                #endif
+            }
         /* The angle set depends on startup ramp */
-        thetaElectricalOpenLoop += (int16_t)(motorStartUpData.startupRamp >> 
-                                            STARTUPRAMP_THETA_OPENLOOP_SCALER);
-
-}
-    /* Switched to closed loop */
-    else 
-    {
-        /* In closed loop slowly decrease the offset add to the estimated angle */
-        if (estimator.qRhoOffset > 0)
-        {
-            estimator.qRhoOffset--;
-        }
+        thetaElectricalOpenLoop = sectorToAngle[mcappData.sector];
+        mcappData.HallTheta = thetaElectricalOpenLoop;
     }
 }
 // *****************************************************************************

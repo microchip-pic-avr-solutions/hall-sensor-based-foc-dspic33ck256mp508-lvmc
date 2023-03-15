@@ -106,37 +106,22 @@ typedef union
 
 typedef struct
 {
-   uint16_t index;
-   int16_t buffer[SPEED_MOVING_AVG_FILTER_SIZE];
-   int32_t sum;
-   int16_t avg;
-}MCAPP_SPEED_MOVING_AVG_T;
-
-typedef struct
-{    
-    int32_t  timerDelta;
-    uint32_t  timerPrev;
-    uint32_t  timeIntervalMax;
-    uint16_t  speedValue;
-    uint16_t timerDeltaPreScaler;
-} MCAPP_SPEED_CALC_T;
-
-typedef struct 
-{
     uint16_t timerValue;
-    
-    /* internal variable for angle */
-    int32_t ThetaStateVar;
-    
     uint16_t sector;
-    
     uint16_t SpeedHall;
-    
     /* angle of estimation */
-    int16_t HallTheta;
-    
-    MCAPP_SPEED_MOVING_AVG_T movingAvgFilterSpeed;
-    MCAPP_SPEED_CALC_T    calculateSpeed;
+    int16_t HallTheta;    
+
+    int16_t period;
+    int32_t periodStateVar;
+    int16_t periodFilter;
+    int16_t PeriodKFilter;
+    int16_t phaseInc;
+    int16_t correctHallTheta;
+    int16_t hallThetaError;
+    int16_t halfHallThetaCorrection;
+    int16_t hallCorrectionFactor;
+    int16_t hallCorrectionCounter;
 } MCAPP_DATA_T;
 
 extern MCAPP_DATA_T mcappData;

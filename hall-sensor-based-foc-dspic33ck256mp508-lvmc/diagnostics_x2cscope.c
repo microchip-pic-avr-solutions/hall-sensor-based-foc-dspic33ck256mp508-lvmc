@@ -45,7 +45,10 @@
 #include "uart1.h"
 #include <stdint.h>
 
+#define X2C_DATA __attribute__((section("x2cscope_data_buf")))
 #define X2C_BAUDRATE_DIVIDER 54
+#define X2C_BUFFER_SIZE 4900
+X2C_DATA static uint8_t X2C_BUFFER[X2C_BUFFER_SIZE];
     /*
      * baud rate = 100MHz/16/(1+baudrate_divider) for highspeed = false
      * baud rate = 100MHz/4/(1+baudrate_divider) for highspeed = true
@@ -108,14 +111,6 @@ static void X2CScope_sendSerial(uint8_t data)
 
 static uint8_t X2CScope_receiveSerial()
 {
-    const uint16_t error_mask = _U1STA_OERR_MASK 
-                              | _U1STA_FERR_MASK
-                              | _U1STA_PERR_MASK;
-    if (UART1_StatusGet() & error_mask)
-    {
-        UART1_ReceiveBufferOverrunErrorFlagClear();
-        return 0;
-    }
     return UART1_DataRead();
 }
 
@@ -136,5 +131,5 @@ void X2CScope_Init(void)
         X2CScope_receiveSerial,
         X2CScope_isReceiveDataAvailable,
         X2CScope_isSendReady);
-    X2CScope_Initialise();
+    X2CScope_Initialise(X2C_BUFFER,sizeof(X2C_BUFFER));
 }

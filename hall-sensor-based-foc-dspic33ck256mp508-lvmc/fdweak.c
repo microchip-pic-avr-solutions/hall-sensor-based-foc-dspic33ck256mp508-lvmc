@@ -34,10 +34,10 @@
  *******************************************************************************/
 
 #include "fdweak.h"
-#include "estim.h"
 #include "userparms.h"
 #include "general.h"
 
+MOTOR_PARM_T motorParm;
 FDWEAK_PARM_T fdWeakParm;
 
 #define FWONSPEED NOMINAL_SPEED_RPM*NOPOLESPAIRS
@@ -71,6 +71,13 @@ void InitFWParams(void)
     fdWeakParm.qIdRef = IDREF_BASESPEED;
     /* Start speed for Field weakening  */
     fdWeakParm.qFwOnSpeed = FWONSPEED ;
+
+    motorParm.qLsDtBase = NORM_LSDTBASE;
+    motorParm.qLsDt = motorParm.qLsDtBase;
+    motorParm.qRs = NORM_RS;
+
+    motorParm.qInvKFiBase = NORM_INVKFIBASE;
+    motorParm.qInvKFi = motorParm.qInvKFiBase;
 
     /* Initialize magnetizing curve values */
     fdWeakParm.qFwCurve[0] = IDREF_SPEED0;
@@ -173,9 +180,6 @@ int16_t FieldWeakening(int16_t qMotorSpeed)
         /* Set Idref as first value in magnetizing curve */
         fdWeakParm.qIdRef = fdWeakParm.qFwCurve[0];
 
-        /* Adapt filter parameter */
-        estimator.qKfilterEsdq = KFILTER_ESDQ;
-
         /* Inverse Kfi constant for base speed */
         qInvKFi = motorParm.qInvKFiBase;
     } 
@@ -194,9 +198,6 @@ int16_t FieldWeakening(int16_t qMotorSpeed)
         /* Interpolation between two results from the Table */
         fdWeakParm.qIdRef = fdWeakParm.qFwCurve[fdWeakParm.qIndex]-
                 (int16_t) (__builtin_mulss(iTempInt1, iTempInt2) >> SPEED_INDEX_CONST);
-
-        /* Adapt filer parameter */
-        estimator.qKfilterEsdq = KFILTER_ESDQ_FW;
 
         /* Interpolation between two results from the Table */
         iTempInt1 = fdWeakParm.qInvKFiCurve[fdWeakParm.qIndex] -

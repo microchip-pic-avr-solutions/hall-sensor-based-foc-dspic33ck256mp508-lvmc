@@ -62,6 +62,29 @@ typedef struct
     int16_t qLsCurve[18];    
 } FDWEAK_PARM_T;
 
+/* Motor Estimator Parameter data type
+
+  Description:
+    This structure will host motor parameters parameters required by angle
+    estimator.
+ */
+typedef struct
+{
+    /* Rs value - stator resistance */
+    int16_t qRs;
+    /* Ls/dt value - stator inductance / dt - variable with speed */
+    int16_t qLsDt;
+    /* Ls/dt value - stator inductance / dt for base speed (nominal) */
+    int16_t qLsDtBase;
+    /* InvKfi constant value ( InvKfi = Omega/BEMF ) */
+    int16_t qInvKFi;
+    /* InvKfi constant - base speed (nominal) value */
+    int16_t qInvKFiBase;            
+    /* filter constant for d-q BEMF */
+    int16_t qKfilterEsdq;
+} MOTOR_PARM_T;
+
+extern MOTOR_PARM_T motorParm;
 extern FDWEAK_PARM_T fdWeakParm;
 
 void InitFWParams();

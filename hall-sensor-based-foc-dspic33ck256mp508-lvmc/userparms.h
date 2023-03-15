@@ -100,11 +100,11 @@ controllers, tuning mode will disable the speed PI controller */
 #define MAXIMUM_SPEED_RPM    3500 
 
 /* The following values are given in the xls attached file */
-#define NORM_CURRENT_CONST     0.000179
+#define NORM_CURRENT_CONST     0.000671
 /* normalized ls/dt value */
-#define NORM_LSDTBASE 2162
+#define NORM_LSDTBASE 8129
 /* normalized rs value */
-#define NORM_RS  2406
+#define NORM_RS  9044
 /* the calculation of Rs gives a value exceeding the Q15 range so,
  the normalized value is further divided by 2 to fit the 32768 limit
  this is taken care in the estim.c where the value is implied
@@ -144,7 +144,7 @@ controllers, tuning mode will disable the speed PI controller */
  normally this value should not be modified, but in 
  case of fine tuning of the transition, depending on 
  the load or the rotor moment of inertia */
-#define INITOFFSET_TRANS_OPEN_CLSD 0x2000
+#define INITOFFSET_TRANS_OPEN_CLSD 1
 
 /* current transformation macro, used below */
 #define NORM_CURRENT(current_real) (Q15(current_real/NORM_CURRENT_CONST/32768))
@@ -157,14 +157,14 @@ before the open loop speed ramp up */
 /* This number is: 20,000 is 1 second. */
 #define LOCK_TIME 4000 
 /* Open loop speed ramp up end value Value in RPM*/
-#define END_SPEED_RPM 500 
+#define END_SPEED_RPM 400 
 /* Open loop acceleration */
-#define OPENLOOP_RAMPSPEED_INCREASERATE 10
+#define OPENLOOP_RAMPSPEED_INCREASERATE 50
 /* Open loop q current setup - */
-#define Q_CURRENT_REF_OPENLOOP NORM_CURRENT(1.0)
+#define Q_CURRENT_REF_OPENLOOP NORM_CURRENT(0.4)
 
 /* Specify Over Current Limit - DC BUS */
-#define Q15_OVER_CURRENT_THRESHOLD NORM_CURRENT(3.0)
+#define Q15_OVER_CURRENT_THRESHOLD NORM_CURRENT(5.0)
 
 /* Maximum motor speed converted into electrical speed */
 #define MAXIMUMSPEED_ELECTR MAXIMUM_SPEED_RPM*NOPOLESPAIRS

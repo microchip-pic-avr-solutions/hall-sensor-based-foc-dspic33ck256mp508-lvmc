@@ -1,4 +1,3 @@
-#include "motor_control_mapping.h"
 #include "motor_control_declarations.h"
 
 /* 
