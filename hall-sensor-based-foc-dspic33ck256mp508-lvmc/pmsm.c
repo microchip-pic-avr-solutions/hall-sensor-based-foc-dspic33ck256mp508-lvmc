@@ -604,10 +604,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
                     (long int)mcappData.periodFilter)*(int)(mcappData.PeriodKFilter));
             mcappData.periodFilter = (int)(mcappData.periodStateVar>>15);
 
-            mcappData.phaseInc = __builtin_divud((uint32_t)853334,
-                                (unsigned int)(mcappData.periodFilter >> 1));
+            mcappData.phaseInc = __builtin_divud((uint32_t)PHASE_INC_CALC,
+                                    (unsigned int)(mcappData.periodFilter >> 1));
             
-            mcappData.SpeedHall = __builtin_divud((uint32_t)31000000,
+            mcappData.SpeedHall = __builtin_divud((uint32_t)SPEED_MULTI,
                                     (unsigned int)(mcappData.periodFilter));
             /* if open loop */
             if (uGF.bits.OpenLoop == 1)

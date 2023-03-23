@@ -46,6 +46,7 @@ extern "C" {
 #include <stdint.h>
 #include "general.h"
 #include "hal/sccp.h"
+#include "hal/pwm.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -184,15 +185,11 @@ minimum value accepted */
 #define SPEEDREFRAMP_COUNT   3  
     
 /**  SPEED MULTIPLIER CALCULATION = ((FCY*60)/(TIMER_PRESCALER*POLEPAIRS))  */
-#define SPEED_MULTI     (unsigned long)((((float)FCY/(float)(SPEED_MEASURE_TIMER_PRESCALER*NOPOLESPAIRS))*(float)60)*(float)(10/12))
+#define SPEED_MULTI     (unsigned long)(31000000)//(((float)TIMER_CONSTANT/(float)NOPOLESPAIRS)*(float)60)
+    
+#define PHASE_INC_CALC (unsigned long)(853334)//(((float)TIMER_CONSTANT)/(PWMFREQUENCY_HZ))*(float)(65535/6))
     
 // *****************************************************************************
-/** Moving Average - No of Samples*/
-#define PERIOD_MOVING_AVG_FILTER_SCALE     4
-#define PERIOD_MOVING_AVG_FILTER_SIZE       (uint16_t)(1 << PERIOD_MOVING_AVG_FILTER_SCALE) 
-#define SPEED_MOVING_AVG_FILTER_SCALE      4
-#define SPEED_MOVING_AVG_FILTER_SIZE       (uint16_t)(1 << SPEED_MOVING_AVG_FILTER_SCALE)
-    
 /* PI controllers tuning values - */     
 /* D Control Loop Coefficients */
 #define D_CURRCNTR_PTERM       Q15(0.05)
