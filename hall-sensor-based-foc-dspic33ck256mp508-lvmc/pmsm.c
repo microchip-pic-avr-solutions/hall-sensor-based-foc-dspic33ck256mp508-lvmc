@@ -138,7 +138,7 @@ int main ( void )
     DiagnosticsInit();
     
     BoardServiceInit();
-    HAL_MC1HallStateChangeTimerPrescalerSet(SPEED_MEASURE_TIMER_PRESCALER);
+    HAL_MC1HallStateChangeTimerPrescalerSet(TIMER_PRESCALER);
     HAL_MC1HallStateChangeMaxPeriodSet(0xFFFFFFFF);
     HAL_MC1HallStateChangeTimerStart();
     CORCONbits.SATA = 0;

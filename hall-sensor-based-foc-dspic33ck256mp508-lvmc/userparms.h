@@ -185,9 +185,9 @@ minimum value accepted */
 #define SPEEDREFRAMP_COUNT   3  
     
 /**  SPEED MULTIPLIER CALCULATION = ((FCY*60)/(TIMER_PRESCALER*POLEPAIRS))  */
-#define SPEED_MULTI     (unsigned long)(31000000)//(((float)TIMER_CONSTANT/(float)NOPOLESPAIRS)*(float)60)
+#define SPEED_MULTI     (31000000)//(unsigned long)(((float)FCY/(float)TIMER_PRESCALER)*(float)60)//
     
-#define PHASE_INC_CALC (unsigned long)(853334)//(((float)TIMER_CONSTANT)/(PWMFREQUENCY_HZ))*(float)(65535/6))
+#define PHASE_INC_CALC (uint32_t)(853334)//((float)(FCY/(TIMER_PRESCALER*PWMFREQUENCY_HZ))*(float)(65536/6)) //
     
 // *****************************************************************************
 /* PI controllers tuning values - */     
