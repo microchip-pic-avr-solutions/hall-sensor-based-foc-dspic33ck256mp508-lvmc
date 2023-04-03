@@ -35,11 +35,9 @@
         </logicalFolder>
       </logicalFolder>
       <itemPath>../control.h</itemPath>
-      <itemPath>../fdweak.h</itemPath>
       <itemPath>../general.h</itemPath>
       <itemPath>../motor_control_noinline.h</itemPath>
       <itemPath>../userparms.h</itemPath>
-      <itemPath>../singleshunt.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -63,9 +61,7 @@
         <itemPath>../hal/device_config.c</itemPath>
         <itemPath>../hal/sccp.c</itemPath>
       </logicalFolder>
-      <itemPath>../fdweak.c</itemPath>
       <itemPath>../pmsm.c</itemPath>
-      <itemPath>../singleshunt.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
