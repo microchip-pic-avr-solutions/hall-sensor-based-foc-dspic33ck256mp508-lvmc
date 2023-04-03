@@ -1,12 +1,16 @@
 ![image](images/microchip.jpg) 
 
-# HALL SENSOR BASED FOC USING LVMC DSPIC33CK256MP508 
+# HALL SENSOR BASED FOC USING  DSPIC33CK256MP508 LVMC
 
 ## 1. INTRODUCTION
-<p style='text-align: justify;'>
-This demonstration describes a method of driving a hall sensor based FOC for a Permanent Magnet Synchronous Motor (PMSM) with dsPIC33CK Low Voltage Motor Control Board and dsPIC33CK256MP508 Digital Signal Controller (DSC). 
+This demonstration describes a method of driving Permanent Magnet Synchronous Motor (PMSM) using hall sensor based Field Oriented Control (FOC) on the hardware platform dsPIC33CK Low Voltage Motor Control Board (LVMC). 
+ 
+The  rotor position information is obtained from the three hall sensors of the motor. The hall sensors are distributed along the stator in such a way that they generate six different logic states per electrical cycle. The continuous angle needed for the FOC is obtained by interpolating hall sensor transition which occurs every sixty electrical degrees (see the figure below). </p>
 
-The demonstration code uses three hall sensors to provide rotor position information. The hall sensors are distributed along the stator in such a way that they generate six different logic states per electrical cycle. From the the six commutation states to generate a continuous angle needed for sinusoidal voltage the interpolation is done in between the six states .</p>
+<br />
+    <p align="left">
+      <img  src="images/Hallsectorconversion.png"></p>
+    <br />
 
 ## 2. SUGGESTED DEMONSTRATION REQUIREMENTS
 
