@@ -7,7 +7,7 @@
       "version":"1.0.0",
       "displayName":"Hall Sensor Based FOC dsPIC33CK256MP508 LVMC",
       "projectName":"hall-sensor-based-foc-dspic33ck256mp508-lvmc",
-      "shortDescription":"Hall Sensor Based FOC for PMSM using dsPIC33CK LVMC Board",
+      "shortDescription":"Hall Sensor Based Field Oriented Control of Permanent Magnet Synchronous Motor using dsPIC33CK LVMC Board",
       "ide":{
          "name":"MPLABX",
          "semverRange":">=6.00"
@@ -41,7 +41,6 @@
       "keywords":[
          "Motor Control",
          "PMSM",
-         "Sensorless Control",
          "FOC",
          "dsPIC"
       ]
