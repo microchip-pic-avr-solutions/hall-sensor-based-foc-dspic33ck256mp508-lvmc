@@ -158,7 +158,7 @@ Follow the below instructions, step by step, to set up and run the motor control
 
 7. If the device is successfully programmed, **LD11 (LED2)** will be turned **ON**, indicating that the dsPIC® DSC is enabled.
 
-8. Run or stop the motor by pressing the push button **SW1.** The motor should start spinning smoothly in one direction in the nominal speed range. Ensure that the motor is spinning smoothly without any vibration. The LED **LD3(LED2)** is turned **ON** to show the button is pressed to start the motor.
+8. Run or stop the motor by pressing the push button **SW1.** The motor should start spinning smoothly in one direction in the nominal speed range. Ensure that the motor is spinning smoothly without any vibration.
      <p align="left">
      <img  src="images/pushbuttons.png"></p>
  
