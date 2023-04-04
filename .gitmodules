@@ -1,0 +1,8 @@
+[submodule "hall-sensor-based-foc-dspic33ck256mp508-lvmc/library/motor"]
+	path = hall-sensor-based-foc-dspic33ck256mp508-lvmc/library/motor
+	url = https://github.com/microchip-pic-avr-solutions/library-motor
+	branch = master
+[submodule "hall-sensor-based-foc-dspic33ck256mp508-lvmc/library/x2cscope"]
+	path = hall-sensor-based-foc-dspic33ck256mp508-lvmc/library/x2cscope
+	url = https://github.com/microchip-pic-avr-solutions/library-x2cscope
+	branch = master

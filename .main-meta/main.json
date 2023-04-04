@@ -1,0 +1,48 @@
+{
+   "metaDataVersion":"1.0.0",
+   "category":"com.microchip.ide.project",
+   "content":{
+      "metaDataVersion":"1.3.0",
+      "name":"com.microchip.mplabx.project.hall-sensor-based-foc-dspic33ck256mp508-lvmc",
+      "version":"1.0.0",
+      "displayName":"Hall Sensor Based FOC dsPIC33CK256MP508 LVMC",
+      "projectName":"hall-sensor-based-foc-dspic33ck256mp508-lvmc",
+      "shortDescription":"Hall Sensor Based Field Oriented Control of Permanent Magnet Synchronous Motor using dsPIC33CK LVMC Board",
+      "ide":{
+         "name":"MPLABX",
+         "semverRange":">=6.00"
+      },
+      "compiler":{
+         "name":"XC16",
+         "semverRange":">=2.00"
+      },
+      "dfp":{
+         "name":"dsPIC33CK-MP_DFP",
+         "semverRange":"=1.9.228"
+      },
+	  "configurator": {
+         "name": "MCC",
+         "semverRange": ">=4.0.1"
+      },
+      "device":{
+         "metaDataVersion":"1.0.0",
+         "category":"com.microchip.portal.contentRef",
+         "content":{
+            "metaDataVersion":"1.0.0",
+            "category":"com.microchip.device",
+            "name":"dsPIC33CK256MP508",
+            "versionRange":"*"
+         }
+      },
+	  "peripherals":[
+         "ADC",
+		 "PWM"
+      ],
+      "keywords":[
+         "Motor Control",
+         "PMSM",
+         "FOC",
+         "dsPIC"
+      ]
+   }
+}
