@@ -40,7 +40,7 @@
 #include "adc.h"
 #include "pwm.h"
 #include "cmp.h"
-#include "sccp.h"
+#include "timer.h"
 
 BUTTON_T buttonStartStop;
 BUTTON_T buttonSpeedHalfDouble;
@@ -185,8 +185,8 @@ uint16_t HAL_HallValueRead(void)
     None.
  */
 void InitPeripherals(void)
-{          
-    Init_SCCP4 ();     
+{           
+    Init_Timer (); 
     uint16_t cmpReference = 0;
     CMP_Initialize();
     CMP1_ModuleEnable(true);

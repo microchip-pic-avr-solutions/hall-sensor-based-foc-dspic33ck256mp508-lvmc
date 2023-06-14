@@ -17,7 +17,7 @@
         <itemPath>../hal/uart1.h</itemPath>
         <itemPath>../hal/measure.h</itemPath>
         <itemPath>../hal/cmp.h</itemPath>
-        <itemPath>../hal/sccp.h</itemPath>
+        <itemPath>../hal/timer.h</itemPath>
       </logicalFolder>
       <logicalFolder name="library" displayName="library" projectFiles="true">
         <logicalFolder name="motor" displayName="motor" projectFiles="true">
@@ -59,7 +59,7 @@
         <itemPath>../hal/measure.c</itemPath>
         <itemPath>../hal/cmp.c</itemPath>
         <itemPath>../hal/device_config.c</itemPath>
-        <itemPath>../hal/sccp.c</itemPath>
+        <itemPath>../hal/timer.c</itemPath>
       </logicalFolder>
       <itemPath>../pmsm.c</itemPath>
     </logicalFolder>
