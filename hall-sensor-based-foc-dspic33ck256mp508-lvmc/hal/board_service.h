@@ -78,10 +78,10 @@ typedef struct
 
 #define HAL_MC1HallStateChangeInterrupt              _CNEInterrupt    
 #define HAL_MC1HallStateChangeDetectionEnable        CN_PortEEnable        
-#define HAL_MC1HallStateChangeInterruptFlagClear    CN_InterruptPortEFlagClear
-#define HAL_MC1HallStateChangeMaxPeriodSet           SCCP4_SetTimerPeriod
-#define HAL_MC1HallStateChangeTimerPrescalerSet      SCCP4_SetTimerPrescaler    
-#define HAL_MC1HallStateChangeTimerStart             SCCP4_Timer_Start    
+#define HAL_MC1HallStateChangeInterruptFlagClear     CN_InterruptPortEFlagClear
+#define HAL_MC1HallStateChangeMaxPeriodSet           TIMER_SetTimerPeriod
+#define HAL_MC1HallStateChangeTimerPrescalerSet      TIMER_SetTimerPrescaler    
+#define HAL_MC1HallStateChangeTimerStart             Timer_Start    
 
 extern void DisablePWMOutputsInverterA(void);
 extern void EnablePWMOutputsInverterA(void);
