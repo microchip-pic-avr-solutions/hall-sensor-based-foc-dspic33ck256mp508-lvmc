@@ -45,7 +45,7 @@ extern "C" {
 // *****************************************************************************
 #include <stdint.h>
 #include "general.h"
-#include "sccp.h"
+#include "timer.h"
 #include "pwm.h"
 
 // *****************************************************************************
@@ -141,9 +141,9 @@ minimum value accepted */
 /* The Speed Control Loop Executes every  SPEEDREFRAMP_COUNT */
 #define SPEEDREFRAMP_COUNT   3  
     
-/**  SPEED MULTIPLIER CALCULATION = ((FCY*60)/(TIMER_PRESCALER*POLEPAIRS))  */
-#define SPEED_MULTI     (31000000)//(unsigned long)(((float)FCY/(float)TIMER_PRESCALER)*(float)60)//
-    
+/**  SPEED MULTIPLIER CALCULATION = ((FCY*60)/(TIMER_PRESCALER*6))
+ * This is to calculate speed in electrical RPM  */
+#define SPEED_MULTI     (unsigned long)((float)(FCY/(float)(TIMER_PRESCALER*6)))*(float)(60)    
 /** PHASE INCREMENT MULTIPLIER = (FCY/(TIMER_PRESCALER*PWM_FREQUENCY))(65536/6)*/
 #define PHASE_INC_MULTI    (unsigned long)((float)FCY/((float)(TIMER_PRESCALER)*(float)(PWMFREQUENCY_HZ))*(float)(65536/6))
     

@@ -59,13 +59,13 @@
 // Section: Functions
 // *****************************************************************************
 // *****************************************************************************
-void Init_SCCP4(void);
+void Init_Timer(void);
 // *****************************************************************************
 /* Function:
-    void Init_SCCP4(void)
+    void Init_Timer(void)
 
   Summary:
-    Routine to initialize SCCP4 in timer mode
+    Routine to initialize
 
   Description:
     Function to find the time difference for speed calculation
@@ -82,22 +82,15 @@ void Init_SCCP4(void);
   Remarks:
     None.
  */
-void Init_SCCP4(void)
-{          
-    CCP4CON1Lbits.CCSEL = 0;     // Set SCCP4 operating OFF
-    CCP4CON1Lbits.T32 = 0;       // Set timebase width (16-bit = 0)
-    CCP4CON1Lbits.MOD = 0b0000;  // Set mode to 16/32 bit timer mode features to Output Timer Mode
-    CCP4CON1Hbits.SYNC = 0b00000;// No external synchronization; timer rolls over at FFFFh or matches with the Timer Period register
-    CCP4CON1Lbits.TMRSYNC = 0;   // Set timebase synchronization (Synchronized)
-    CCP4CON1Lbits.CLKSEL = 0b000;// Set the clock source (Tcy)
-    CCP4CON1Lbits.TMRPS = 0b00;  // Set the clock pre-scaler (1:64)
-    CCP4CON1Hbits.TRIGEN = 0;    // Set Sync/Triggered mode (Synchronous)
+void Init_Timer(void)
+{       
+    T1CONbits.TON = 0;
+    T1CON = 0;
+    T1CONbits.TECS = 1;
+    T1CONbits.TCKPS = 2;
     
-    CCP4TMRL = 0x0000;           // Initialize timer prior to enable module.
-    CCP4TMRH = 0x0000;           // Initialize timer prior to enable module.
-   
-    IPC10bits.CCT4IP = 6;        // Interrupt Priority set
-    IFS2bits.CCT4IF = 0;         // Clear Interrupt flag
-    IEC2bits.CCT4IE = 0;         // Disable Interrupt
-    CCP4CON1Lbits.CCPON = 0;     // Disable CCP/input capture
+    PR1 = 0xFFFF;
+    TMR1 = 0;
+    
+    T1CONbits.TON = 1;
 }
